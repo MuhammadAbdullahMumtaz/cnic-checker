@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register & Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- <script type="module" src="firebaseauth.js"></script> -->
+</head>
+
+<body>
+  <div class="container" id="signup">
+    <h1 class="form-title">Check CNIC</h1>
+    <form method="post" action="">
+      <div id="cnicMessage" class="messageDiv" style="display: none;"></div>
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="cnic" placeholder="CNIC here" required>
+        <label for="fname">Enter CNIC</label>
+      </div>
+      <button class="btn" id="checkentery">Check</button>
+    </form>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBnvOeUNUsMDad5MAHz4MGc1P9uZpiJTEg",
+        authDomain: "id-data-c8249.firebaseapp.com",
+        databaseURL: "https://id-data-c8249-default-rtdb.firebaseio.com",
+        projectId: "id-data-c8249",
+        storageBucket: "id-data-c8249.appspot.com",
+        messagingSenderId: "963294891975",
+        appId: "1:963294891975:web:d39b15575c1796ff6453e2"
+      };
+
+      const app = initializeApp(firebaseConfig);
+
+      import { getDatabase, ref, child, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+
+      const db = getDatabase();
+
+      let cnic = document.getElementById('cnic');
+
+      let check = document.getElementById('checkentery');
+
+
+      // showing the message on form
+      function showMessage(message, divId) {
+        var messageDiv = document.getElementById(divId);
+        messageDiv.style.display = "block";
+        messageDiv.innerHTML = message;
+        messageDiv.style.opacity = 1;
+        setTimeout(function () {
+          messageDiv.style.opacity = 0;
+        }, 5000);
+      }
+
+
+      function Add_data(event) {
+        event.preventDefault();  // Prevent form submission
+
+        const dbref = ref(db);
+
+        get(child(dbref, 'CNIC_DATA/' + cnic.value))
+          .then((snap) => {
+            if (snap.exists()) {
+             showMessage('CNIC already exists in the storage.','cnicMessage');
+            }
+            else {
+              set(ref(db, 'CNIC_DATA/' + cnic.value), {
+                cnic: Number(cnic.value)
+              }).then(() => {
+                showMessage('CNIC allowed','cnicMessage');
+              }).catch((error) => {
+                alert("Error occurred!");
+                console.log(error);  // Corrected typo
+              });
+            }
+          })
+      }
+
+
+      check.addEventListener('click', Add_data);
+    </script>
+</body>
+
+</html>

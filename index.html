@@ -21,6 +21,32 @@
         <label for="fname">Enter CNIC</label>
       </div>
       <button class="btn" id="checkentery">Check</button>
+      <table>
+        <tr>
+          <th style="padding-right: 80px;">CNIC RECORDS</th>
+          <th>Validation</th>
+        </tr>
+        <tr>
+          <td  tyle="padding-right: 80px;" id="records1"></td>
+          <td id="valid1"></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 80px;" id="records2"></td>
+          <td id="valid2"></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 80px;" id="records3"></td>
+          <td id="valid3"></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 80px;" id="records4"></td>
+          <td id="valid4"></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 80px;" id="records5"></td>
+          <td  id="valid5"></td>
+        </tr>
+      </table>
     </form>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
@@ -37,17 +63,28 @@
 
       const app = initializeApp(firebaseConfig);
 
-      import { getDatabase, ref, child, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+      import { getDatabase, ref, child, get, set } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
       const db = getDatabase();
 
       let cnic = document.getElementById('cnic');
 
       let check = document.getElementById('checkentery');
+      let total = document.getElementById('totalrecords');
+      
+
+      const array = [];
+      const Valid = [];
+      let count = 0;
 
 
       // showing the message on form
       function showMessage(message, divId) {
+        if(message == "CNIC allowed"){
+          Valid[count] = "Valid";
+        }else{
+          Valid[count] = "Invalid";
+        }
         var messageDiv = document.getElementById(divId);
         messageDiv.style.display = "block";
         messageDiv.innerHTML = message;
@@ -59,30 +96,67 @@
 
 
       function Add_data(event) {
-        event.preventDefault();  // Prevent form submission
+    event.preventDefault();  // Prevent form submission
 
-        const dbref = ref(db);
+    const dbref = ref(db);
 
-        get(child(dbref, 'CNIC_DATA/' + cnic.value))
-          .then((snap) => {
+    get(child(dbref, 'CNIC_DATA/' + cnic.value))
+        .then((snap) => {
             if (snap.exists()) {
-             showMessage('CNIC already exists in the storage.','cnicMessage');
+                showMessage('CNIC already exists in the storage.', 'cnicMessage');
+                Valid[count] = "Invalid"; // Update Valid array for invalid CNIC
+            } else {
+                set(ref(db, 'CNIC_DATA/' + cnic.value), {
+                    cnic: Number(cnic.value)
+                }).then(() => {
+                    showMessage('CNIC allowed', 'cnicMessage');
+                    Valid[count] = "Valid"; // Update Valid array for valid CNIC
+                }).catch((error) => {
+                    alert("Error occurred!");
+                    console.log(error);
+                });
             }
-            else {
-              set(ref(db, 'CNIC_DATA/' + cnic.value), {
-                cnic: Number(cnic.value)
-              }).then(() => {
-                showMessage('CNIC allowed','cnicMessage');
-              }).catch((error) => {
-                alert("Error occurred!");
-                console.log(error);  // Corrected typo
-              });
-            }
-          })
-      }
+        });
 
+    array[count++] = cnic.value; // Store CNIC value
+    updateRecords(); // Update records after adding
+}
+
+
+      // for previous records
+
+      let record1 = document.getElementById('records1');
+        let validation1 = document.getElementById('valid1');
+        let record2 = document.getElementById('records2');
+        let validation2 = document.getElementById('valid2');
+        let record3 = document.getElementById('records3');
+        let validation3 = document.getElementById('valid3');
+        let record4 = document.getElementById('records4');
+        let validation4 = document.getElementById('valid4');
+        let record5 = document.getElementById('records5');
+        let validation5 = document.getElementById('valid5');
+
+
+        function updateRecords() {
+    const maxRecords = 5; // Limit to last 5 records
+    const startIndex = Math.max(0, count - maxRecords); // Start from the appropriate index
+
+    for (let i = 0; i < maxRecords; i++) {
+        const recordIndex = startIndex + i;
+        if (recordIndex < count) { // Check if index is within bounds
+            document.getElementById(`records${i + 1}`).innerHTML = array[recordIndex];
+            document.getElementById(`valid${i + 1}`).innerHTML = Valid[recordIndex];
+        } else {
+            document.getElementById(`records${i + 1}`).innerHTML = '';
+            document.getElementById(`valid${i + 1}`).innerHTML = '';
+        }
+    }
+}
 
       check.addEventListener('click', Add_data);
+
+
+
     </script>
 </body>
 

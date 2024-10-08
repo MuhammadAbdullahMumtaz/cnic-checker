@@ -105,21 +105,22 @@
             if (snap.exists()) {
                 showMessage('CNIC already exists in the storage.', 'cnicMessage');
                 Valid[count] = "Invalid"; // Update Valid array for invalid CNIC
+    array[count++] = cnic.value; // Store CNIC value
+    updateRecords(); // Update records after adding
             } else {
                 set(ref(db, 'CNIC_DATA/' + cnic.value), {
                     cnic: Number(cnic.value)
                 }).then(() => {
                     showMessage('CNIC allowed', 'cnicMessage');
                     Valid[count] = "Valid"; // Update Valid array for valid CNIC
+    array[count++] = cnic.value; // Store CNIC value
+    updateRecords(); // Update records after adding
                 }).catch((error) => {
                     alert("Error occurred!");
                     console.log(error);
                 });
             }
         });
-
-    array[count++] = cnic.value; // Store CNIC value
-    updateRecords(); // Update records after adding
 }
 
 
